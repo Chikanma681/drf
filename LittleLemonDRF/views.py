@@ -3,7 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework import generics
 import json
+from .models import MenuItem
+from .serializers import MenuItemSerializer
 # Create your views here.
 
 @api_view(['POST','GET'])
@@ -32,6 +35,15 @@ class BookView(APIView):
         return Response ({"title":request.data.get('title')}, status.HTTP_200_OK)
 
 
+class MenuItemsView(generics.ListCreateAPIView):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+
+class SingleMenuItenView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+
+##
 # class Book(APIView):
 #     def get(self,request, pk):
 #         return Response({"message":"single book with id "+str(pk)},status.HTTP_201_CREATED)
