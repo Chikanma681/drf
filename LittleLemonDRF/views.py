@@ -7,6 +7,7 @@ from rest_framework import generics
 import json
 from .models import MenuItem
 from .serializers import MenuItemSerializer
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 @api_view(['POST','GET'])
@@ -35,13 +36,27 @@ class BookView(APIView):
         return Response ({"title":request.data.get('title')}, status.HTTP_200_OK)
 
 
-class MenuItemsView(generics.ListCreateAPIView):
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
+# class MenuItemsView(generics.ListCreateAPIView):
+#     queryset = MenuItem.objects.all()
+#     serializer_class = MenuItemSerializer
 
-class SingleMenuItenView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
+@api_view()
+def menu_items(request):
+    items = MenuItem.objects.all()
+    serialized_items = MenuItemSerializer(items, many= True) # many = True is essential when transforming a list to JSON data
+    return Response(serialized_items.data)
+
+
+@api_view()
+def single_item(request,id):
+    # item = MenuItem.objects.get(pk=id)
+    item = get_object_or_404(MenuItem,pk=id)
+    serialized_item = MenuItemSerializer(item) # many = True is essential when transforming a list to JSON data
+    return Response(serialized_item.data)
+
+# class SingleMenuItenView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+#     queryset = MenuItem.objects.all()
+#     serializer_class = MenuItemSerializer
 
 ##
 # class Book(APIView):
