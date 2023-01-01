@@ -1,12 +1,17 @@
 from rest_framework import serializers
 from .models import MenuItem
+from decimal imporet Decimal
 
 class MenuItemSerializer(serializers.ModelSerializer):
+    stock = serializers.IntegerField(source='inventory') #use a different name from the model
+    price_after_tax = serializer.SerializerMethodField(method_name='calculate_tax')
+
     class Meta:
         model = MenuItem
-        fields = ['id', 'title']
+        fields = ['id', 'title','stock', 'price_after_tax']
 
-
+    def calculate_tax(self, product:MenuItem):
+        return product.price+Decimal(1.1)
 
 # class MenuItemSerializer(serializers.ModelSerializer):
 #     class Meta:
