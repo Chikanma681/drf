@@ -49,7 +49,7 @@ def menu_items(request):
 
 @api_view()
 def single_item(request,id):
-    # item = MenuItem.objects.get(pk=id)
+    # item = MenuItem.objects.get(pk=id) #NORMAL GET WITHOUT CUSTOM 404 PAGE
     item = get_object_or_404(MenuItem,pk=id)
     serialized_item = MenuItemSerializer(item) # many = True is essential when transforming a list to JSON data
     return Response(serialized_item.data)
