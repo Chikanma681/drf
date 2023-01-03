@@ -35,10 +35,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class MenuItemSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(read_only=True)
+    category_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = MenuItem
-        fields = ['id', 'title','inventory','price','category']
+        fields = ['id', 'title','inventory','price','category','category_id']
     
     # def create(self, validated_data,**kwargs):
     #     # category_data = validated_data.pop('category')

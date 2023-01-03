@@ -45,7 +45,7 @@ class BookView(APIView):
 @api_view(['GET','POST'])
 def menu_items(request):
     if request.method == 'GET':
-        items = MenuItem.objects.all()
+        items = MenuItem.objects.select_related('category').all() # select_related from the SQL queries in one call
         serialized_items = MenuItemSerializer(items, many= True) # many = True is essential when transforming a list to JSON data
         return Response(serialized_items.data)
 
