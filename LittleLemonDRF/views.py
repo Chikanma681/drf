@@ -8,6 +8,7 @@ import json
 from .models import MenuItem
 from .serializers import MenuItemSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework.parsers import JSONParser
 # Create your views here.
 
 @api_view(['POST','GET'])
@@ -18,6 +19,7 @@ def books(request):
     print(request.data)
     if (author):
         return Response({"message":"list of the books by "+author},status.HTTP_200_OK)
+
 class Orders():
     @staticmethod
     @api_view
@@ -40,12 +42,19 @@ class BookView(APIView):
 #     queryset = MenuItem.objects.all()
 #     serializer_class = MenuItemSerializer
 
-@api_view()
+@api_view(['GET','POST'])
 def menu_items(request):
-    items = MenuItem.objects.all()
-    serialized_items = MenuItemSerializer(items, many= True) # many = True is essential when transforming a list to JSON data
-    return Response(serialized_items.data)
+    if request.method == 'GET':
+        items = MenuItem.objects.all()
+        serialized_items = MenuItemSerializer(items, many= True) # many = True is essential when transforming a list to JSON data
+        return Response(serialized_items.data)
 
+    if request.method == 'POST':
+        serializer = MenuItemSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        print(serializer.validated_data)
+        serializer.save()
+        return Response(serializer.data)
 
 @api_view()
 def single_item(request,id):
