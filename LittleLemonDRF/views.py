@@ -46,6 +46,19 @@ class BookView(APIView):
 def menu_items(request):
     if request.method == 'GET':
         items = MenuItem.objects.select_related('category').all() # select_related from the SQL queries in one call
+        category_name = request.query_params.get('category') #category name
+        to_price = request.query_params.get('to_price')
+        search = request.query_params.get('search')
+        ordering = request.query_params.get('ordering')
+
+        if category_name:
+            items = items.filter(category__title=category_name)
+        if to_price:
+            items = items.filter(price__lte=to_price) #equals to also works here
+        if search:
+            items = items.filter(title__istartswith=search)
+        if ordering: #to call descending order you can do ?ordering=-(field)
+            items = items.order_by(ordering)
         serialized_items = MenuItemSerializer(items, many= True) # many = True is essential when transforming a list to JSON data
         return Response(serialized_items.data)
 
