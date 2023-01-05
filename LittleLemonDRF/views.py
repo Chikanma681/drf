@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes,throttle_classes
 from rest_framework.views import APIView
 from rest_framework import generics
 import json
@@ -9,7 +9,12 @@ from .models import MenuItem
 from .serializers import MenuItemSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import JSONParser
+from django.core.paginator import Paginator, EmptyPage
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from .throttle import TenCallsPerMinute
 # Create your views here.
+
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST','GET'])
 def books(request):
@@ -51,6 +56,16 @@ def menu_items(request):
         search = request.query_params.get('search')
         ordering = request.query_params.get('ordering')
 
+        #Implementing pagination
+        perpage = request.query_params.get('perpage',default=2)
+        page = request.query_params.get('page',default=1)
+
+        paginator = Paginator(items, per_page=perpage)
+        try:
+            items = paginator.page(number=page)
+        except EmptyPage:
+            items=[]
+
         if category_name:
             items = items.filter(category__title=category_name)
         if to_price:
@@ -76,6 +91,46 @@ def single_item(request,id):
     serialized_item = MenuItemSerializer(item) # many = True is essential when transforming a list to JSON data
     return Response(serialized_item.data)
 
+@api_view()
+@permission_classes([IsAuthenticated])
+def secret(request):
+    return Response({
+        "message":"Some secret message"
+    })
+
+@api_view()
+@permission_classes
+def manager_view(request):
+    return Response({
+        "message":"Only Manager Should See This"
+    })
+
+@api_view()
+@permission_classes([IsAuthenticated])
+def manager_view(request):
+    if request.user.groups.filter(name='Manager').exists():
+        return Response({"message":"Only Manager should see this"})
+    else:
+        return Response({
+            "message":"You are not authorized"
+        },403)
+
+
+@api_view()
+@throttle_classes([AnonRateThrottle])
+def throttle_check(request):
+    return Response({
+        "message":"succesful"
+    })
+
+@api_view()
+@permission_classes([IsAuthenticated])
+# @throttle_classes([UserRateThrottle])
+@throttle_classes([TenCallsPerMinute])
+def throttle_check_auth(request):
+    return Response({
+        "message":"message for the logged in users only"
+    })
 # class SingleMenuItenView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
 #     queryset = MenuItem.objects.all()
 #     serializer_class = MenuItemSerializer

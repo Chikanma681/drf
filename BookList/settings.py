@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'LittleLemonDRF', # you dont have it
-    'debug_toolbar'
+    'LittleLemonDRF', 
+    'debug_toolbar',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,27 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+REST_FRAMEWORK = {
+    # 'DEFAULT_RENDERER_CLASSES':[
+    #     'rest_framework.renderers.JSONRenderer',
+    #     'rest_framework.renderers.BrowsableAPIRenderer',
+    #     'rest_framework_xml.renderers.XMLRenderer',
+
+    # ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES':(
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+
+    'DEFAULT_THROTTLE_RATES':{
+        'anon':'3/minute',
+        'user':'5/minute',
+        'ten':"10/minute"
+        # 'anon':'20/day',
+
+
+    }
+}
 
 INTERNAL_IPS = [
     '127.0.0.1'
