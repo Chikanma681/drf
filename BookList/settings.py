@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +41,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'LittleLemonDRF', 
     'debug_toolbar',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'djoser', #djoser has to be under restframework authentication
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 MIDDLEWARE = [
@@ -137,6 +141,8 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES':(
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
     'DEFAULT_THROTTLE_RATES':{
@@ -145,6 +151,11 @@ REST_FRAMEWORK = {
         'ten':"10/minute"
         # 'anon':'20/day',
 
+# 'DEFAULT_THROTTLE_CLASSES': [
+#         'rest_framework.throttling.AnonRateThrottle',
+#         'rest_framework.throttling.UserRateThrottle'
+# ], throttling for class based views
+
 
     }
 }
@@ -152,3 +163,12 @@ REST_FRAMEWORK = {
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
+
+DJOSER = {
+    "USER_ID_FIELD":"username", # which field acts as the primary key
+    # "LOGIN_FIELD":"email"
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5)
+}

@@ -12,9 +12,11 @@ from rest_framework.parsers import JSONParser
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from .throttle import TenCallsPerMinute
+from rest_framework.permissions import IsAdminUser
 # Create your views here.
 
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User, Group
 
 @api_view(['POST','GET'])
 def books(request):
@@ -131,6 +133,27 @@ def throttle_check_auth(request):
     return Response({
         "message":"message for the logged in users only"
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def managers(request):
+    username = request.data['username']
+    if username:
+        user = get_object_or_404(user, username=username)
+        managers = Group.objects.get(name="Manager")
+        if request.method == 'POST':
+            managers.user_set.add(user)
+        if request.method == 'DELETE':
+            managers.user_set.remove(user)
+        return Response({
+            "message":"ok"
+        })
+    return Response({
+        "message":"error"
+    },status.HTTP_400_BAD_REQUEST)
+
+
 # class SingleMenuItenView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
 #     queryset = MenuItem.objects.all()
 #     serializer_class = MenuItemSerializer
